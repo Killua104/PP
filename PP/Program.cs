@@ -58,10 +58,25 @@ namespace UniversalDbManager
                         continue;
                     }
 
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Неизвестная команда");
-                    Console.ResetColor();
-                    Console.ReadKey();  
+                }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Неизвестная команда");
+                Console.ResetColor();
+                Console.ReadKey();  
+            }
+        }
+
+        private static void LoadConfig()
+        {
+            string iniPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
+            if (File.Exists(iniPath))
+            {
+                foreach (var line in File.ReadAllLines(iniPath))
+                {
+                    if (line.StartsWith("Path", StringComparison.OrdinalIgnoreCase) && line.Contains("="))
+                    {
+                        dbPath = line.Split('=')[1].Trim();
+                    }
                 }
             }
         }
