@@ -21,7 +21,7 @@ namespace UniversalDbManager
                 Console.WriteLine($"=== УНИВИРСАЛЬНЫЙ МЕНЕДЖЕР БД ===");
                 Console.ResetColor();
                 Console.WriteLine("Доступные команды:");
-                Console.ForegroundColor= ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine(" view [таблица] - Просмотр любой таблицы");
                 Console.WriteLine(" excel [таблица] - Экспорт любой таблицы в Excel");
                 Console.ResetColor();
@@ -30,7 +30,40 @@ namespace UniversalDbManager
                 Console.WriteLine(" test - Комплексная проверка структуры БД");
                 Console.WriteLine(" exit - Выход");
                 Console.Write("\nВведите команду: ");
+
+                string input = Console.ReadLine()?.Trim().ToLower();
+                if (string.IsNullOrEmpty(input)) continue;
+                
+                //Пока только для Coupons
+                if (input == "add") { Add(); continue; }
+                if (input == "del") { Delete(); continue; }
+                if (input == "test") { Test(); continue; }
+                if (input == "exit") break;
+
+                string[] parts = input.Split(' ', 2);
+                if (parts.Length == 2)
+                {
+                    string action = parts[0];
+                    string tableName = parts[1];
+
+                    if (action == "viwe")
+                    {
+                        ViewTableUniversal(tableName);
+                        continue;
+                    }
+
+                    if (action == "excel")
+                    {
+                        ExportToExcelUniversal(tableName);
+                        continue;
+                    }
+
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Неизвестная команда");
+                    Console.ResetColor();
+                    Console.ReadKey();  
+                }
             }
+        }
     }
-}
 }
