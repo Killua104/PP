@@ -112,7 +112,7 @@ namespace UniversalDbManager
         }
 
         // УПРАВЛЕНИЕ КУПОНАМИ - УДАЛЕНИЕ
-        private static void DeleteCoupon()
+        private static void Delete()
         {
             Console.Clear();
             Console.WriteLine("=== УДАЛЕНИЕ КУПОНА ===");
