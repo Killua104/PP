@@ -136,5 +136,52 @@ namespace UniversalDbManager
             catch (Exception ex) { Console.WriteLine(ex.Message); }
             Console.ReadKey();
         }
+
+        // ТЕСТ
+        private static void Test()
+        {
+            Console.Clear();
+            Console.WriteLine("=== ТЕСТ ПРОВЕРКИ ЦЕЛОСТНОСТИ СТРУКТУРЫ БД ===");
+
+            string[] tablesToCheck = { "Coupons", "Goods", "GoodsPrices", "Goodsleftovers", "GChecks", "Shifts" };
+
+            try
+            {
+                using (var conn = GetConnection())
+                {
+                    conn.Open();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("[OK] Соединение с файлом базы данных успешно установлено.\n");
+                    Console.ResetColor();
+
+                    foreach (var table in tablesToCheck)
+                    {
+                        string sql = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}';";
+                        using (var cmd = new SQLiteCommand(sql, conn))
+                        {
+                            var res = cmd.ExecuteScalar();
+                            if (res != null)
+                            {
+                                Console.Write($"Проверка таблицы {table,-16} -> ");
+                                Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine("[СУЩЕСТВУЕТ]"); Console.ResetColor();
+                            }
+                            else
+                            {
+                                Console.Write($"Проверка таблицы {table,-16} -> ");
+                                Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("[ОТСУТСТВУЕТ!]"); Console.ResetColor();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[КРИТИЧЕСКАЯ ОШИБКА ТЕСТА]: {ex.Message}");
+                Console.ResetColor();
+            }
+            Console.WriteLine("\nТестирование завершено. Нажмите любую клавишу...");
+            Console.ReadKey();
+        }
     }
 }
