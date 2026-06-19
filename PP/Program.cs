@@ -80,5 +80,35 @@ namespace UniversalDbManager
                 }
             }
         }
+        private static SQLiteConnection GetConnection() => new SQLiteConnection($"Data Source={dbPath};Version=3;");
+
+        // УПРАВЛЕНИЕ КУПОНАМИ - ДОБАВЛЕНИЕ
+        private static void Add()
+        {
+            Console.Clear();
+            Console.WriteLine("=== ДОБАВЛЕНИЕ КУПОНА ===");
+            Console.Write("Введите серию/номер купона (Nom): ");
+            string nom = Console.ReadLine();
+            Console.Write("Введите сумму (Sum): ");
+            if (!double.TryParse(Console.ReadLine(), out double sum)) { Console.WriteLine("Ошибка ввода."); Console.ReadKey(); return; }
+
+            try
+            {
+                using (var conn = GetConnection())
+                {
+                    conn.Open();
+                    string sql = "INSERT INTO Coupons (Nom, Sum, Transmitted) VALUES (@nom, @sum, 0)";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@nom", nom);
+                        cmd.Parameters.AddWithValue("@sum", sum);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine("Купон добавлен.");
+            }
+            catch (Exception ex) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine(ex.Message); }
+            Console.ResetColor(); Console.ReadKey();
+        }
     }
 }
