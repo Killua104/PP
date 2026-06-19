@@ -87,7 +87,7 @@ namespace UniversalDbManager
         {
             Console.Clear();
             Console.WriteLine("=== ДОБАВЛЕНИЕ КУПОНА ===");
-            Console.Write("Введите серию/номер купона (Nom): ");
+            Console.Write("Введите номер купона (Nom): ");
             string nom = Console.ReadLine();
             Console.Write("Введите сумму (Sum): ");
             if (!double.TryParse(Console.ReadLine(), out double sum)) { Console.WriteLine("Ошибка ввода."); Console.ReadKey(); return; }
@@ -109,6 +109,32 @@ namespace UniversalDbManager
             }
             catch (Exception ex) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine(ex.Message); }
             Console.ResetColor(); Console.ReadKey();
+        }
+
+        // УПРАВЛЕНИЕ КУПОНАМИ - УДАЛЕНИЕ
+        private static void DeleteCoupon()
+        {
+            Console.Clear();
+            Console.WriteLine("=== УДАЛЕНИЕ КУПОНА ===");
+            Console.Write("Введите ID купона: ");
+            if (!int.TryParse(Console.ReadLine(), out int id)) return;
+
+            try
+            {
+                using (var conn = GetConnection())
+                {
+                    conn.Open();
+                    string sql = "DELETE FROM Coupons WHERE id = @id";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        int r = cmd.ExecuteNonQuery();
+                        Console.WriteLine(r > 0 ? "Успешно удалено." : "ID не найден.");
+                    }
+                }
+            }
+            catch (Exception ex) { Console.WriteLine(ex.Message); }
+            Console.ReadKey();
         }
     }
 }
