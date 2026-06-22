@@ -11,7 +11,7 @@ namespace UniversalDbManager
         private static string dbPath = "Db.db";
         static void Main(string[] args)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            Environment.SetEnvironmentVariable("EPPlusLicenseContext", "NonCommercial");
             LoadConfig();
 
             while (true)
