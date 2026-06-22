@@ -247,5 +247,60 @@ namespace UniversalDbManager
             Console.WriteLine("\nНажмите любую клавишу...");
             Console.ReadKey();
         }
+
+        // ЭКСПОРТ В EXCEL
+        private static void ExportToExcelUniversal(string tableName)
+        {
+            Console.Clear();
+            string fileName = $"{tableName}_export.xlsx";
+            try
+            {
+                using (var conn = GetConnection())
+                {
+                    conn.Open();
+                    string sql = $"SELECT * FROM [{tableName}]";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    using (var adapter = new SQLiteDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        if (dt.Rows.Count == 0)
+                        {
+                            Console.WriteLine("Нет данных для экспорта.");
+                            Console.ReadKey();
+                            return;
+                        }
+
+                        using (var package = new ExcelPackage())
+                        {
+                            var ws = package.Workbook.Worksheets.Add(tableName);
+                            ws.Cells["A1"].LoadFromDataTable(dt, true);
+
+                            // Красивое оформление шапки
+                            using (var range = ws.Cells[1, 1, 1, dt.Columns.Count])
+                            {
+                                range.Style.Font.Bold = true;
+                                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Black);
+                                range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                            }
+
+                            ws.Cells[ws.Dimension.Address].AutoFitColumns();
+                            package.SaveAs(new FileInfo(fileName));
+                        }
+                    }
+                }
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Успешно! Таблица [{tableName}] сохранена в файл: {Path.GetFullPath(fileName)}");
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Ошибка экспорта: {ex.Message}");
+            }
+            Console.ResetColor();
+            Console.ReadKey();
+        }
     }
 }
