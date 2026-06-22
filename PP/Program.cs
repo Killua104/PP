@@ -100,7 +100,8 @@ namespace UniversalDbManager
                 using (var conn = GetConnection())
                 {
                     conn.Open();
-                    string sql = "INSERT INTO Coupons (Nom, Sum, Transmitted) VALUES (@nom, @sum, 0)";
+                    // string sql = "INSERT INTO Coupons (Nom, Sum, Transmitted) VALUES (@nom, @sum, 0)";
+                    string sql = "INSERT INTO Coupons (Nom, Sum) VALUES (@nom, @sum)";
                     using (var cmd = new SQLiteCommand(sql, conn))
                     {
                         cmd.Parameters.AddWithValue("@nom", nom);
