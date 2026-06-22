@@ -281,10 +281,10 @@ namespace UniversalDbManager
                         }
 
                         // Используем StreamWriter для записи файла
-                        // UTF-8 с BOM (Encoding.UTF8) важен, чтобы Excel сразу правильно понял русские буквы
+                        // чтобы Excel сразу правильно понял русские буквы
                         using (var writer = new StreamWriter(fileName, false, System.Text.Encoding.UTF8))
                         {
-                            // 1. Записываем заголовки колонок. В качестве разделителя используем точку с запятой (стандарт для Excel)
+                            // Записываем заголовки колонок. В качестве разделителя используем точку с запятой (стандарт для Excel)
                             List<string> columns = new List<string>();
                             foreach (DataColumn column in dt.Columns)
                             {
@@ -292,14 +292,14 @@ namespace UniversalDbManager
                             }
                             writer.WriteLine(string.Join(";", columns));
 
-                            // 2. Записываем строки с данными
+                            // Записываем строки с данными
                             foreach (DataRow row in dt.Rows)
                             {
                                 List<string> fields = new List<string>();
                                 foreach (var item in row.ItemArray)
                                 {
                                     string field = item?.ToString() ?? "";
-                                    // Если внутри текста есть точка с запятой или кавычки, экранируем их, чтобы не ломать структуру
+                                    // Если внутри текста есть точка с запятой или кавычки, экранируем их
                                     if (field.Contains(";") || field.Contains("\"") || field.Contains("\n"))
                                     {
                                         field = "\"" + field.Replace("\"", "\"\"") + "\"";
