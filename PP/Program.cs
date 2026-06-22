@@ -42,8 +42,12 @@ namespace UniversalDbManager
                 if (inputLower == "test") { Test(); continue; }
                 if (inputLower == "exit") break;
 
-                //string[] parts = input.Split(' ', 2);
-                string[] parts = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = input.Split(' ', 2);
+                // ВРЕМЕННЫЙ ОТЛАДОЧНЫЙ ВЫВОД:
+                Console.WriteLine($"DEBUG: Всего частей: {parts.Length}");
+                if (parts.Length >= 1) Console.WriteLine($"DEBUG: Действие = '{parts[0]}'");
+                if (parts.Length >= 2) Console.WriteLine($"DEBUG: Таблица = '{parts[1]}'");
+                Console.ReadKey();
                 if (parts.Length >= 2)
                 {
                     string action = parts[0].ToLower();
