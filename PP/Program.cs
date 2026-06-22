@@ -33,18 +33,21 @@ namespace UniversalDbManager
 
                 string input = Console.ReadLine()?.Trim().ToLower();
                 if (string.IsNullOrEmpty(input)) continue;
-                
-                //Пока только для Coupons
-                if (input == "add") { Add(); continue; }
-                if (input == "del") { Delete(); continue; }
-                if (input == "test") { Test(); continue; }
-                if (input == "exit") break;
 
-                string[] parts = input.Split(' ', 2);
-                if (parts.Length == 2)
+                string inputLower = input.ToLower();
+
+                //Пока только для Coupons
+                if (inputLower == "add") { Add(); continue; }
+                if (inputLower == "del") { Delete(); continue; }
+                if (inputLower == "test") { Test(); continue; }
+                if (inputLower == "exit") break;
+
+                //string[] parts = input.Split(' ', 2);
+                string[] parts = input.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
                 {
-                    string action = parts[0];
-                    string tableName = parts[1];
+                    string action = parts[0].ToLower();
+                    string tableName = string.Join(" ", parts, 1, parts.Length - 1);
 
                     if (action == "view")
                     {
