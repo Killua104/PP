@@ -46,7 +46,7 @@ namespace UniversalDbManager
                     string action = parts[0];
                     string tableName = parts[1];
 
-                    if (action == "viwe")
+                    if (action == "view")
                     {
                         ViewTableUniversal(tableName);
                         continue;
