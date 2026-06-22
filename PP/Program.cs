@@ -183,5 +183,69 @@ namespace UniversalDbManager
             Console.WriteLine("\nТестирование завершено. Нажмите любую клавишу...");
             Console.ReadKey();
         }
+
+        // ПРОСМОТР ЛЮБОЙ ТАБЛИЦЫ 
+        private static void ViewTableUniversal(string tableName)
+        {
+            Console.Clear();
+            try
+            {
+                using (var conn = GetConnection())
+                {
+                    conn.Open();
+                    // Параметризация имени таблицы в чистом SQL невозможна, поэтому экранируем имя для защиты от SQL-инъекций
+                    string sql = $"SELECT * FROM [{tableName}]";
+
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    using (var adapter = new SQLiteDataAdapter(cmd))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        if (dt.Rows.Count == 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine($"Таблица '{tableName}' пуста или не существует.");
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine($"--- СОДЕРЖИМОЕ ТАБЛИЦЫ: {tableName.ToUpper()} (Строк: {dt.Rows.Count}) ---");
+                            Console.ResetColor();
+
+                            // Выводим шапку таблицы на основе структуры БД
+                            foreach (DataColumn column in dt.Columns)
+                            {
+                                Console.Write($"{column.ColumnName,-15}\t");
+                            }
+                            Console.WriteLine("\n" + new string('-', dt.Columns.Count * 20));
+
+                            // Выводим данные строк
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                foreach (var item in row.ItemArray)
+                                {
+                                    // На всякий случай обрезаем длинные строки для консоли, чтобы не ломать разметку
+                                    // (В дальнейшем можно отредактировать ещё)
+                                    string val = item?.ToString() ?? "NULL";
+                                    if (val.Length > 14) val = val.Substring(0, 11) + "...";
+                                    Console.Write($"{val,-15}\t");
+                                }
+                                Console.WriteLine();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Ошибка доступа к таблице '{tableName}': {ex.Message}");
+                Console.ResetColor();
+            }
+            Console.WriteLine("\nНажмите любую клавишу...");
+            Console.ReadKey();
+        }
     }
 }
