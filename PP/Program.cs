@@ -255,13 +255,16 @@ namespace UniversalDbManager
         private static void ExportToExcelUniversal(string tableName)
         {
             Console.Clear();
-            string fileName = $"{tableName}_export.xlsx";
+            // Сохраняем в CSV, который Excel откроет по умолчанию
+            string fileName = $"{tableName}_export.csv";
+
             try
             {
                 using (var conn = GetConnection())
                 {
                     conn.Open();
                     string sql = $"SELECT * FROM [{tableName}]";
+
                     using (var cmd = new SQLiteCommand(sql, conn))
                     using (var adapter = new SQLiteDataAdapter(cmd))
                     {
@@ -270,39 +273,57 @@ namespace UniversalDbManager
 
                         if (dt.Rows.Count == 0)
                         {
-                            Console.WriteLine("Нет данных для экспорта.");
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine($"Таблица '{tableName}' пуста или не существует. Нечего экспортировать.");
+                            Console.ResetColor();
                             Console.ReadKey();
                             return;
                         }
 
-                        using (var package = new ExcelPackage())
+                        // Используем StreamWriter для записи файла
+                        // UTF-8 с BOM (Encoding.UTF8) важен, чтобы Excel сразу правильно понял русские буквы
+                        using (var writer = new StreamWriter(fileName, false, System.Text.Encoding.UTF8))
                         {
-                            var ws = package.Workbook.Worksheets.Add(tableName);
-                            ws.Cells["A1"].LoadFromDataTable(dt, true);
-
-                            // Красивое оформление шапки
-                            using (var range = ws.Cells[1, 1, 1, dt.Columns.Count])
+                            // 1. Записываем заголовки колонок. В качестве разделителя используем точку с запятой (стандарт для Excel)
+                            List<string> columns = new List<string>();
+                            foreach (DataColumn column in dt.Columns)
                             {
-                                range.Style.Font.Bold = true;
-                                range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Black);
-                                range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                                columns.Add(column.ColumnName);
                             }
+                            writer.WriteLine(string.Join(";", columns));
 
-                            ws.Cells[ws.Dimension.Address].AutoFitColumns();
-                            package.SaveAs(new FileInfo(fileName));
+                            // 2. Записываем строки с данными
+                            foreach (DataRow row in dt.Rows)
+                            {
+                                List<string> fields = new List<string>();
+                                foreach (var item in row.ItemArray)
+                                {
+                                    string field = item?.ToString() ?? "";
+                                    // Если внутри текста есть точка с запятой или кавычки, экранируем их, чтобы не ломать структуру
+                                    if (field.Contains(";") || field.Contains("\"") || field.Contains("\n"))
+                                    {
+                                        field = "\"" + field.Replace("\"", "\"\"") + "\"";
+                                    }
+                                    fields.Add(field);
+                                }
+                                writer.WriteLine(string.Join(";", fields));
+                            }
                         }
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Успешно! Таблица '{tableName}' экспортирована в файл: {fileName}");
+                        Console.ResetColor();
                     }
                 }
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Успешно! Таблица [{tableName}] сохранена в файл: {Path.GetFullPath(fileName)}");
             }
             catch (Exception ex)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Ошибка экспорта: {ex.Message}");
+                Console.WriteLine($"Ошибка при экспорте таблицы '{tableName}': {ex.Message}");
+                Console.ResetColor();
             }
-            Console.ResetColor();
+
+            Console.WriteLine("\nНажмите любую клавишу...");
             Console.ReadKey();
         }
     }
